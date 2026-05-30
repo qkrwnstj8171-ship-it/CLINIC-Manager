@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Management System - JUNSUH</title>
+    <style>
+        :root {
+            --container-bg: #ffffff;
+            --text-color: #1d1d1f; 
+            --accent-color: #0071e3; 
+            --border-color: #d2d2d7;
+            --font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
+            --border-radius: 14px;
+        }
+
+        body { font-family: var(--font-family); color: var(--text-color); margin: 0; padding: 20px; font-size: 14px; line-height: 1.5; transition: background-color 0.4s ease; min-height: 100vh; position: relative; }
+        .container { max-width: 950px; margin: 0 auto; background: var(--container-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 50px; }
+        .hidden { display: none !important; }
+        
+        /* 좌하단 마크 */
+        .branding-mark { position: fixed; bottom: 15px; left: 20px; font-size: 11px; font-weight: 700; color: #86868b; opacity: 0.5; letter-spacing: 1px; z-index: 999; }
+
+        h2 { font-size: 22px; font-weight: 600; margin-top: 0; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        h3 { font-size: 18px; font-weight: 600; margin: 20px 0 10px 0; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        h4 { font-size: 14px; margin: 15px 0 10px 0; font-weight: 600; color: #1d1d1f; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        th, td { border-bottom: 1px solid var(--border-color); padding: 10px; text-align: center; vertical-align: middle; font-size: 13px; }
+        th { background-color: #fbfbfd; font-weight: 600; color: #86868b; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f5f5f7; }
+        
+        button { padding: 6px 14px; cursor: pointer; background-color: var(--accent-color); color: white; border: none; border-radius: 20px; font-weight: 500; font-size: 13px; margin-right: 4px; transition: background-color 0.4s, opacity 0.2s; }
+        button:hover { opacity: 0.8; }
+        .btn-gray { background-color: #86868b; }
+        .btn-red { background-color: #ff3b30; } 
+        .btn-outline { background-color: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); transition: all 0.4s; }
+        .btn-outline:hover { background-color: var(--accent-color); color: white; }
+        
+        input, textarea, select { width: 100%; padding: 8px 12px; margin-top: 4px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 13px; background-color: #fbfbfd; transition: border-color 0.4s; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-color); background-color: white; }
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .flex-group { display: flex; gap: 12px; }
+        .flex-group > div { flex: 1; }
+
+        .teacher-profile-card { background: #f5f5f7; border-radius: 10px; padding: 12px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .profile-info-item { margin-right: 15px; }
+        .subject-select-btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; text-align: left; background: #f5f5f7; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; font-weight: 600; color: var(--text-color); cursor: pointer; transition: all 0.3s; }
+        .subject-select-btn:hover { border-color: var(--accent-color); background: #edf2ff; }
+        .tab-btn { background-color: transparent; color: #86868b; border: none; border-radius: 15px; padding: 6px 16px; font-weight: 600; cursor: pointer; }
+        .tab-btn.active { background-color: #e8e8ed; color: var(--text-color); }
+        
+        .planner-header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 3px solid #1d1d1f; }
+        .planner-title { font-size: 24px; font-weight: 700; border: none; background: transparent; width: 60%; padding: 0; margin: 0; color: var(--text-color); font-family: var(--font-family); }
+        .student-name-display { font-size: 24px; font-weight: 700; color: var(--text-color); letter-spacing: -0.5px; }
+        .dday-badge { display: inline-block; background-color: #ff3b30; color: white; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: 700; margin-top: 4px; }
+        
+        .planner-table { margin-top: 5px; border: 2px solid #1d1d1f; border-radius: 0; table-layout: fixed; width: 100%; }
+        .planner-table th { width: 15%; background-color: #f4f5f7; color: #1d1d1f; border-bottom: 1px solid #1d1d1f; border-right: 2px solid #1d1d1f; padding: 10px 4px; text-align: center; vertical-align: middle; }
+        .planner-table td { text-align: left; padding: 0; border-bottom: 1px solid #1d1d1f; background-color: #fff; vertical-align: top; }
+        .day-name { font-size: 15px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
+        .date-wrap { display: block; font-weight: 600; font-size: 11px; color: #555; white-space: nowrap; }
+        .day-date-input { width: 22px; text-align: center; border: none; border-bottom: 1px solid #86868b; background: transparent; padding: 0; margin: 0; font-size: 12px; font-weight: 700; color: #1d1d1f; }
+        .editable-cell { width: 100%; min-height: 85px; padding: 10px 14px; box-sizing: border-box; outline: none; font-size: 14px; font-weight: 600; line-height: 1.5; word-break: break-all; }
+        .sub-input-row { display: flex; gap: 6px; margin-top: 4px; }
+        .sub-input-row input { margin-top: 0; }
+
+        @media print {
+            body { background-color: white !important; padding: 0; margin: 0; }
+            .container { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 0; }
+            .no-print { display: none !important; }
+            .planner-table { width: 100%; border: 2px solid #000 !important; }
+            .planner-table th { background-color: #f4f5f7 !important; border: 1px solid #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 8px 4px; }
+            .planner-table td { border-bottom: 1px solid #000 !important; background-color: #fff !important; }
+            .day-date-input { border-bottom: none; }
+            .planner-title { border: none; font-size: 24px !important; font-weight: 800; }
+            .editable-cell { min-height: 95px; font-size: 13px; padding: 8px 12px; } 
+            .dday-badge { background-color: #000 !important; color: #fff !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="branding-mark no-print">Made by JUNSUH</div>
+
+    <div class="container">
+        <div id="login-page">
+            <h2>🔒 Clinic Tool Login</h2>
+            <p style="font-size: 13px; color: #86868b;">선생님만의 <strong>개인 코드</strong>를 입력하세요.</p>
+            <input type="password" id="access-code" placeholder="비밀번호 입력" onkeypress="if(event.keyCode==13) loginUser()">
+            <button onclick="loginUser()" style="margin-top: 15px; width: 100%; padding: 10px;">로그인</button>
+        </div>
+
+        <div id="subject-dashboard-page" class="hidden">
+            <h2>📚 과목 반 선택</h2>
+            <div id="dashboard-subject-list"></div>
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+            <h4>➕ 다른 과목 추가 개설</h4>
+            <div class="flex-group" style="align-items: flex-end;">
+                <div class="form-group" style="margin: 0;">
+                    <select id="new-dash-subject">
+                        <option value="수학">수학</option><option value="국어">국어</option>
+                        <option value="영어">영어</option><option value="탐구(과학)">탐구(과학)</option>
+                        <option value="탐구(사회)">탐구(사회)</option>
+                    </select>
+                </div>
+                <button onclick="createNewSubjectClass()" style="height: 38px;">개설하기</button>
+            </div>
+            <button onclick="logoutUser()" class="btn-gray" style="margin-top: 25px; width: 100%;">로그아웃</button>
+        </div>
+
+        <div id="list-page" class="hidden no-print">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px;">
+                <h2 style="border: none; margin: 0; padding: 0;">📋 [<span id="active-subject-title"></span>] 클리닉 목록</h2>
+                <button onclick="backToDashboard()" class="btn-gray" style="font-size: 11px; padding: 4px 12px;">◀ 과목 변경</button>
+            </div>
+
+            <div class="teacher-profile-card">
+                <div>
+                    <span class="profile-info-item"><strong>강사:</strong> <span id="prof-disp-name">-</span></span>
+                    <span class="profile-info-item"><strong>요일:</strong> <span id="prof-disp-days">-</span></span>
+                    <span class="profile-info-item"><strong>시간:</strong> <span id="prof-disp-hours">-</span></span>
+                </div>
+                <button onclick="toggleProfileEdit()" class="btn-outline" style="font-size: 10px; padding: 2px 8px;">프로필 수정</button>
+            </div>
+
+            <div id="profile-edit-zone" class="hidden" style="background:#f1f3f5; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <h4>⚙️ 선생님 프로필 설정</h4>
+                <div class="flex-group">
+                    <div class="form-group"><label>성함</label><input type="text" id="edit-prof-name"></div>
+                    <div class="form-group"><label>근무 요일</label><input type="text" id="edit-prof-days"></div>
+                    <div class="form-group"><label>근무 시간</label><input type="text" id="edit-prof-hours"></div>
+                </div>
+                <button onclick="saveTeacherProfile()" style="padding: 4px 12px;">저장</button>
+                <button onclick="toggleProfileEdit()" class="btn-gray">취소</button>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <button onclick="showDetail('new')" class="btn-outline" style="font-weight:bold;">+ 새 학생 추가</button>
+                <div>
+                    <button onclick="exportData()" class="btn-gray" style="font-size: 11px;">📥 백업</button>
+                    <button onclick="importData()" class="btn-gray" style="font-size: 11px;">📤 복구</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>이름</th><th>학년/나이</th><th>D-Day</th><th>수강 현황 (강사/교재)</th><th>관리</th></tr>
+                </thead>
+                <tbody id="student-list-body"></tbody>
+            </table>
+        </div>
+
+        <div id="detail-page" class="hidden no-print">
+            <h2>📝 학생 정보 편집</h2>
+            <div class="flex-group">
+                <div class="form-group"><label>이름</label><input type="text" id="detail-name"></div>
+                <div class="form-group"><label>나이 (숫자만)</label><input type="number" id="detail-age" oninput="checkAgeFormCondition()"></div>
+                <div class="form-group"><label>학교/학년 정보</label><input type="text" id="detail-school"></div>
+            </div>
+            
+            <h4>🚨 목표 시험 D-Day</h4>
+            <div class="flex-group">
+                <div class="form-group"><label>시험명</label><input type="text" id="detail-exam-name"></div>
+                <div class="form-group"><label>시험일</label><input type="date" id="detail-exam-date"></div>
+            </div>
+
+            <div id="dynamic-subject-fields-box">
+                <div id="form-junior-simple" class="hidden">
+                    <h4>📚 학습 교재 현황</h4>
+                    <div class="form-group">
+                        <label>강사(T) / 교재 목록</label>
+                        <div class="sub-input-row">
+                            <input type="text" id="detail-lec-simple-t" placeholder="T" style="width: 20%;">
+                            <input type="text" id="detail-lec-simple-b" placeholder="교재 및 진도">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="form-senior-detail" class="hidden">
+                    <h4>🔥 고3/재수 전문 관리 시스템 (T / Textbook)</h4>
+                    <div id="detail-box-kor" class="hidden">
+                        <div class="form-group"><label>독서</label><div class="sub-input-row"><input type="text" id="detail-kor-read-t" placeholder="T" style="width:20%;"><input type="text" id="detail-kor-read-b"></div></div>
+                        <div class="form-group"><label>문학</label><div class="sub-input-row"><input type="text" id="detail-kor-lit-t" placeholder="T" style="width:20%;"><input type="text" id="detail-kor-lit-b"></div></div>
+                        <div class="form-group"><label>선택</label><select id="detail-kor-opt"><option>언매</option><option>화작</option></select><div class="sub-input-row"><input type="text" id="detail-kor-opt-t" placeholder="T" style="width:20%;"><input type="text" id="detail-kor-opt-b"></div></div>
+                    </div>
+                    <div id="detail-box-math" class="hidden">
+                        <div class="form-group"><label>수1</label><div class="sub-input-row"><input type="text" id="detail-math-m1-t" placeholder="T" style="width:20%;"><input type="text" id="detail-math-m1-b"></div></div>
+                        <div class="form-group"><label>수2</label><div class="sub-input-row"><input type="text" id="detail-math-m2-t" placeholder="T" style="width:20%;"><input type="text" id="detail-math-m2-b"></div></div>
+                        <div class="form-group"><label>선택</label><select id="detail-math-opt"><option>미적</option><option>확통</option><option>기하</option></select><div class="sub-input-row"><input type="text" id="detail-math-opt-t" placeholder="T" style="width:20%;"><input type="text" id="detail-math-opt-b"></div></div>
+                    </div>
+                    <div id="detail-box-eng" class="hidden">
+                        <div class="form-group"><label>단어</label><div class="sub-input-row"><input type="text" id="detail-eng-word-t" placeholder="T" style="width:20%;"><input type="text" id="detail-eng-word-b"></div></div>
+                        <div class="form-group"><label>듣기</label><div class="sub-input-row"><input type="text" id="detail-eng-listen-t" placeholder="T" style="width:20%;"><input type="text" id="detail-eng-listen-b"></div></div>
+                        <div class="form-group"><label>지문</label><div class="sub-input-row"><input type="text" id="detail-eng-text-t" placeholder="T" style="width:20%;"><input type="text" id="detail-eng-text-b"></div></div>
+                    </div>
+                    <div id="detail-box-scie" class="hidden">
+                        <div class="form-group" style="background:#f8f9fa; padding:10px; border-radius:8px; margin-bottom:5px;"><label>과탐1</label><select id="detail-scie-1"><option>물리학Ⅰ</option><option>화학Ⅰ</option><option>생명과학Ⅰ</option><option>지구과학Ⅰ</option><option>물리학Ⅱ</option><option>화학Ⅱ</option><option>생명과학Ⅱ</option><option>지구과학Ⅱ</option></select><div class="sub-input-row"><input type="text" id="detail-scie-1-t" placeholder="T" style="width:20%;"><input type="text" id="detail-scie-1-b"></div></div>
+                        <div class="form-group" style="background:#f8f9fa; padding:10px; border-radius:8px;"><label>과탐2</label><select id="detail-scie-2"><option>화학Ⅰ</option><option>물리학Ⅰ</option><option>생명과학Ⅰ</option><option>지구과학Ⅰ</option><option>물리학Ⅱ</option><option>화학Ⅱ</option><option>생명과학Ⅱ</option><option>지구과학Ⅱ</option></select><div class="sub-input-row"><input type="text" id="detail-scie-2-t" placeholder="T" style="width:20%;"><input type="text" id="detail-scie-2-b"></div></div>
+                    </div>
+                    <div id="detail-box-soc" class="hidden">
+                        <div class="form-group" style="background:#f8f9fa; padding:10px; border-radius:8px; margin-bottom:5px;"><label>사탐1</label><select id="detail-soc-1"><option>생윤</option><option>윤사</option><option>사문</option><option>정법</option><option>경제</option></select><div class="sub-input-row"><input type="text" id="detail-soc-1-t" placeholder="T" style="width:20%;"><input type="text" id="detail-soc-1-b"></div></div>
+                        <div class="form-group" style="background:#f8f9fa; padding:10px; border-radius:8px;"><label>사탐2</label><select id="detail-soc-2"><option>사문</option><option>생윤</option><option>윤사</option><option>정법</option><option>경제</option></select><div class="sub-input-row"><input type="text" id="detail-soc-2-t" placeholder="T" style="width:20%;"><input type="text" id="detail-soc-2-b"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top:15px;"><label>메모</label><textarea id="detail-memo" rows="2"></textarea></div>
+            <button onclick="saveStudent()">저장하기</button>
+            <button onclick="goToList()" class="btn-gray">취소</button>
+        </div>
+
+        <div id="planner-page" class="hidden">
+            <div class="no-print" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div id="week-tabs" class="tab-container">
+                    <button class="tab-btn active" onclick="changeWeek(0)">1주차</button>
+                    <button class="tab-btn" onclick="changeWeek(1)">2주차</button>
+                    <button class="tab-btn" onclick="changeWeek(2)">3주차</button>
+                    <button class="tab-btn" onclick="changeWeek(3)">4주차</button>
+                </div>
+                <button onclick="saveAndGoList()" class="btn-gray">◀ 목록으로 (자동저장)</button>
+                <button onclick="window.print()" class="btn-outline">🖨️ 프린트</button>
+            </div>
+
+            <div id="print-area">
+                <div class="planner-header">
+                    <input type="text" class="planner-title" id="plan-title" oninput="autoFillDates(this.value)">
+                    <div class="student-info-display">
+                        <div class="student-name-display" id="planner-student-name"></div>
+                        <div id="planner-dday-zone"></div>
+                    </div>
+                </div>
+                <table class="planner-table">
+                    <tbody>
+                        <tr><th><div class="day-name" style="color:var(--accent-color);">토요일</div><div class="date-wrap"><input class="day-date-input" id="date-sat1-m">월 <input class="day-date-input" id="date-sat1-d">일</div></th><td><div class="editable-cell" id="plan-sat1" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name" style="color:#ff3b30;">일요일</div><div class="date-wrap"><input class="day-date-input" id="date-sun-m">월 <input class="day-date-input" id="date-sun-d">일</div></th><td><div class="editable-cell" id="plan-sun" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name">월요일</div><div class="date-wrap"><input class="day-date-input" id="date-mon-m">월 <input class="day-date-input" id="date-mon-d">일</div></th><td><div class="editable-cell" id="plan-mon" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name">화요일</div><div class="date-wrap"><input class="day-date-input" id="date-tue-m">월 <input class="day-date-input" id="date-tue-d">일</div></th><td><div class="editable-cell" id="plan-tue" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name">수요일</div><div class="date-wrap"><input class="day-date-input" id="date-wed-m">월 <input class="day-date-input" id="date-wed-d">일</div></th><td><div class="editable-cell" id="plan-wed" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name">목요일</div><div class="date-wrap"><input class="day-date-input" id="date-thu-m">월 <input class="day-date-input" id="date-thu-d">일</div></th><td><div class="editable-cell" id="plan-thu" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name">금요일</div><div class="date-wrap"><input class="day-date-input" id="date-fri-m">월 <input class="day-date-input" id="date-fri-d">일</div></th><td><div class="editable-cell" id="plan-fri" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name" style="color:var(--accent-color);">토요일</div><div class="date-wrap"><input class="day-date-input" id="date-sat2-m">월 <input class="day-date-input" id="date-sat2-d">일</div></th><td><div class="editable-cell" id="plan-sat2" contenteditable="true"></div></td></tr>
+                        <tr><th><div class="day-name" style="color:var(--accent-color);">코멘트</div></th><td><div class="editable-cell" id="plan-comment" contenteditable="true" style="min-height: 60px;"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 🎨 랜덤 테마 부여 로직 ---
+        const themeSets = [
+            { bg: "#edf2ff", accent: "#3b5bdb" }, { bg: "#e6fcf5", accent: "#099268" }, 
+            { bg: "#fff4e6", accent: "#d9480f" }, { bg: "#fff0f6", accent: "#c2255c" }, { bg: "#f8f0fc", accent: "#7048e8" }  
+        ];
+
+        function initTheme() {
+            const random = themeSets[Math.floor(Math.random() * themeSets.length)];
+            document.body.style.backgroundColor = random.bg;
+            document.documentElement.style.setProperty('--accent-color', random.accent);
+        }
+
+        // --- 데이터 로직 ---
+        let currentTeacherPassword = ""; let currentActiveSubject = ""; let students = []; let teacherProfileMap = {};
+        let currentEditId = null; let currentPlannerStudentId = null; let currentWeekIndex = 0;
+
+        function calculateDDay(dateString) {
+            if (!dateString) return null;
+            const target = new Date(dateString); target.setHours(0,0,0,0);
+            const today = new Date(); today.setHours(0,0,0,0);
+            const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+            return diffDays === 0 ? "D-Day" : (diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`);
+        }
+
+        function autoFillDates(titleValue) {
+            const match = titleValue.match(/(\d+)\s*월\s*(\d+)\s*주차/);
+            if (!match) return;
+            const m = parseInt(match[1]); const w = parseInt(match[2]);
+            if (m < 1 || m > 12 || w < 1 || w > 6) return;
+            let d = new Date(new Date().getFullYear(), m - 1, 1);
+            let day = d.getDay(); let diff = (day === 6) ? 0 : 6 - day;
+            if (diff > 0) d.setDate(d.getDate() + diff - 7); else d.setDate(d.getDate() + diff);
+            d.setDate(d.getDate() + (w - 1) * 7);
+            const order = ['sat1', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat2'];
+            order.forEach((name, i) => {
+                let t = new Date(d); t.setDate(d.getDate() + i);
+                document.getElementById(`date-${name}-m`).value = t.getMonth() + 1;
+                document.getElementById(`date-${name}-d`).value = t.getDate();
+            });
+        }
+
+        function createEmptyPlanners() {
+            return Array.from({length: 4}, (_, i) => ({
+                title: `${new Date().getMonth()+1}월 ${i+1}주차 학습 계획`,
+                sat1: "🎯 클리닉 본 수업 및 테스트", sun: "인강 보충 및 오답 정리", mon: "", tue: "", wed: "", thu: "", fri: "",
+                sat2: "🔥 오답 재테스트 및 점검", comment: "이번 주도 수고 많았습니다!",
+                dates: { sat1_m: "", sat1_d: "", sun_m: "", sun_d: "", mon_m: "", mon_d: "", tue_m: "", tue_d: "", wed_m: "", wed_d: "", thu_m: "", thu_d: "", fri_m: "", fri_d: "", sat2_m: "", sat2_d: "" }
+            }));
+        }
+
+        function loginUser() {
+            const pw = document.getElementById("access-code").value.trim();
+            if(!pw) return alert("코드를 입력하세요.");
+            currentTeacherPassword = pw;
+            teacherProfileMap = JSON.parse(localStorage.getItem(`academy_multi_profiles_${pw}`)) || {"수학": {name:"-", subject:"수학", days:"-", hours:"-"}};
+            localStorage.setItem(`academy_multi_profiles_${pw}`, JSON.stringify(teacherProfileMap));
+            showSubjectDashboard();
+        }
+
+        function showSubjectDashboard() {
+            document.getElementById("login-page").classList.add("hidden");
+            document.getElementById("subject-dashboard-page").classList.remove("hidden");
+            document.getElementById("list-page").classList.add("hidden");
+            const div = document.getElementById("dashboard-subject-list");
+            div.innerHTML = "";
+            Object.keys(teacherProfileMap).forEach(subj => {
+                const b = document.createElement("button");
+                b.className = "subject-select-btn";
+                b.innerHTML = `📘 <strong>[${subj}]</strong> 반 입장 <span style="float:right; font-size:10px;">강사: ${teacherProfileMap[subj].name}</span>`;
+                b.onclick = () => selectSubjectClass(subj);
+                div.appendChild(b);
+            });
+        }
+
+        function createNewSubjectClass() {
+            const s = document.getElementById("new-dash-subject").value;
+            if(teacherProfileMap[s]) return alert("이미 개설된 과목입니다.");
+            teacherProfileMap[s] = { name: "-", subject: s, days: "-", hours: "-" };
+            localStorage.setItem(`academy_multi_profiles_${currentTeacherPassword}`, JSON.stringify(teacherProfileMap));
+            showSubjectDashboard();
+        }
+
+        function selectSubjectClass(s) {
+            currentActiveSubject = s;
+            document.getElementById("subject-dashboard-page").classList.add("hidden");
+            document.getElementById("list-page").classList.remove("hidden");
+            document.getElementById("active-subject-title").innerText = s;
+            students = JSON.parse(localStorage.getItem(`academy_data_user_${currentTeacherPassword}_sub_${s}`)) || [];
+            displayTeacherProfile(); renderTable();
+        }
+
+        function backToDashboard() { document.getElementById("list-page").classList.add("hidden"); showSubjectDashboard(); }
+        function logoutUser() { location.reload(); }
+        function syncStorage() { localStorage.setItem(`academy_data_user_${currentTeacherPassword}_sub_${currentActiveSubject}`, JSON.stringify(students)); }
+
+        function displayTeacherProfile() {
+            const p = teacherProfileMap[currentActiveSubject];
+            document.getElementById("prof-disp-name").innerText = p.name;
+            document.getElementById("prof-disp-days").innerText = p.days;
+            document.getElementById("prof-disp-hours").innerText = p.hours;
+        }
+
+        function toggleProfileEdit() {
+            const z = document.getElementById("profile-edit-zone");
+            if(z.classList.contains("hidden")) {
+                z.classList.remove("hidden");
+                const p = teacherProfileMap[currentActiveSubject];
+                document.getElementById("edit-prof-name").value = p.name==='-'?"":p.name;
+                document.getElementById("edit-prof-days").value = p.days==='-'?"":p.days;
+                document.getElementById("edit-prof-hours").value = p.hours==='-'?"":p.hours;
+            } else z.classList.add("hidden");
+        }
+
+        function saveTeacherProfile() {
+            const p = teacherProfileMap[currentActiveSubject];
+            p.name = document.getElementById("edit-prof-name").value || "-";
+            p.days = document.getElementById("edit-prof-days").value || "-";
+            p.hours = document.getElementById("edit-prof-hours").value || "-";
+            localStorage.setItem(`academy_multi_profiles_${currentTeacherPassword}`, JSON.stringify(teacherProfileMap));
+            displayTeacherProfile(); toggleProfileEdit(); renderTable();
+        }
+
+        function checkAgeFormCondition() {
+            const age = parseInt(document.getElementById("detail-age").value);
+            const junior = document.getElementById("form-junior-simple");
+            const senior = document.getElementById("form-senior-detail");
+            const boxes = ["kor","math","eng","scie","soc"];
+            boxes.forEach(b => document.getElementById(`detail-box-${b}`).classList.add("hidden"));
+            if(!age) { junior.classList.add("hidden"); senior.classList.add("hidden"); return; }
+            if(age >= 19) {
+                junior.classList.add("hidden"); senior.classList.remove("hidden");
+                const map = {"국어":"kor","수학":"math","영어":"eng","탐구(과학)":"scie","탐구(사회)":"soc"};
+                const target = map[currentActiveSubject];
+                if(target) document.getElementById(`detail-box-${target}`).classList.remove("hidden");
+            } else { junior.classList.remove("hidden"); senior.classList.add("hidden"); }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("student-list-body");
+            tbody.innerHTML = students.length ? "" : `<tr><td colspan="5" style="padding:30px; color:#86868b;">학생을 추가해주세요.</td></tr>`;
+            students.forEach(s => {
+                const tr = document.createElement("tr");
+                let info = "";
+                if(parseInt(s.age) >= 19) {
+                    if(currentActiveSubject==="국어") info = `독서:[${s.kor_read_t}] 문학:[${s.kor_lit_t}]`;
+                    else if(currentActiveSubject==="수학") info = `수1:[${s.math_m1_t}] 수2:[${s.math_m2_t}]`;
+                    else if(currentActiveSubject==="영어") info = `단어:[${s.eng_word_t}] 듣기:[${s.eng_listen_t}]`;
+                    else if(currentActiveSubject==="탐구(과학)") info = `${s.scie_1}/${s.scie_2}`;
+                    else info = `${s.soc_1}/${s.soc_2}`;
+                } else info = `[${s.lec_simple_t}] ${s.lec_simple_b}`;
+                const dday = calculateDDay(s.exam_date);
+                tr.innerHTML = `<td><strong>${s.name}</strong></td><td>${s.age}세 / ${s.school}</td><td>${dday?`<span class="dday-badge">${dday}</span>`:'-'}</td><td style="text-align:left;font-size:11px;">${info}</td><td><button onclick="showDetail(${s.id})">수정</button><button onclick="showPlanner(${s.id})" class="btn-outline">계획표</button><button onclick="deleteStudent(${s.id})" class="btn-red">삭제</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteStudent(id) { if(confirm("정말 삭제하시겠습니까?")){ students = students.filter(s=>s.id!==id); syncStorage(); renderTable(); }}
+
+        function showDetail(id) {
+            document.getElementById("list-page").classList.add("hidden");
+            document.getElementById("detail-page").classList.remove("hidden");
+            if(id==='new') {
+                currentEditId = null;
+                document.querySelectorAll("#detail-page input, #detail-page textarea").forEach(i=>i.value="");
+                checkAgeFormCondition();
+            } else {
+                const s = students.find(x=>x.id===id); currentEditId=id;
+                document.getElementById("detail-name").value=s.name;
+                document.getElementById("detail-age").value=s.age;
+                document.getElementById("detail-school").value=s.school;
+                document.getElementById("detail-exam-name").value=s.exam_name||"";
+                document.getElementById("detail-exam-date").value=s.exam_date||"";
+                checkAgeFormCondition();
+                const fields = ["lec_simple_t","lec_simple_b","kor_read_t","kor_read_b","kor_lit_t","kor_lit_b","kor_opt","kor_opt_t","kor_opt_b","math_m1_t","math_m1_b","math_m2_t","math_m2_b","math_opt","math_opt_t","math_opt_b","eng_word_t","eng_word_b","eng_listen_t","eng_listen_b","eng_text_t","eng_text_b","scie_1","scie_1_t","scie_1_b","scie_2","scie_2_t","scie_2_b","soc_1","soc_1_t","soc_1_b","soc_2","soc_2_t","soc_2_b","memo"];
+                fields.forEach(f => { if(document.getElementById(`detail-${f}`)) document.getElementById(`detail-${f}`).value = s[f] || ""; });
+            }
+        }
+
+        function saveStudent() {
+            const name = document.getElementById("detail-name").value.trim();
+            const age = document.getElementById("detail-age").value;
+            if(!name || !age) return alert("필수입력 누락");
+            const data = { name, age, school: document.getElementById("detail-school").value, exam_name: document.getElementById("detail-exam-name").value, exam_date: document.getElementById("detail-exam-date").value };
+            const fields = ["lec_simple_t","lec_simple_b","kor_read_t","kor_read_b","kor_lit_t","kor_lit_b","kor_opt","kor_opt_t","kor_opt_b","math_m1_t","math_m1_b","math_m2_t","math_m2_b","math_opt","math_opt_t","math_opt_b","eng_word_t","eng_word_b","eng_listen_t","eng_listen_b","eng_text_t","eng_text_b","scie_1","scie_1_t","scie_1_b","scie_2","scie_2_t","scie_2_b","soc_1","soc_1_t","soc_1_b","soc_2","soc_2_t","soc_2_b","memo"];
+            fields.forEach(f => { if(document.getElementById(`detail-${f}`)) data[f] = document.getElementById(`detail-${f}`).value; });
+            if(currentEditId) { const i = students.findIndex(x=>x.id===currentEditId); students[i] = {...students[i], ...data}; }
+            else { students.push({id: Date.now(), ...data, planners: createEmptyPlanners()}); }
+            syncStorage(); goToList();
+        }
+
+        function showPlanner(id) {
+            currentPlannerStudentId=id; currentWeekIndex=0;
+            document.getElementById("list-page").classList.add("hidden");
+            document.getElementById("planner-page").classList.remove("hidden");
+            const s = students.find(x=>x.id===id);
+            document.getElementById("planner-student-name").innerText = s.name;
+            renderPlannerWeek();
+        }
+
+        function renderPlannerWeek() {
+            const s = students.find(x=>x.id===currentPlannerStudentId);
+            const p = s.planners[currentWeekIndex];
+            const tabs = document.querySelectorAll(".tab-btn");
+            tabs.forEach((t, i) => t.classList.toggle("active", i===currentWeekIndex));
+            document.getElementById("plan-title").value = p.title;
+            const days = ["sat1","sun","mon","tue","wed","thu","fri","sat2","comment"];
+            days.forEach(d => { document.getElementById(`plan-${d}`).innerHTML = p[d] || ""; });
+            const dZone = document.getElementById("planner-dday-zone");
+            const dText = calculateDDay(s.exam_date);
+            dZone.innerHTML = dText ? `<span class="dday-badge">${s.exam_name}: ${dText}</span>` : "";
+            const dates = p.dates || {};
+            days.filter(d=>d!=='comment').forEach(d => {
+                document.getElementById(`date-${d}-m`).value = dates[`${d}_m`] || "";
+                document.getElementById(`date-${d}-d`).value = dates[`${d}_d`] || "";
+            });
+            if(!dates.sat1_m) autoFillDates(p.title);
+        }
+
+        function saveCurrentPlannerData() {
+            if(!currentPlannerStudentId) return;
+            const s = students.find(x=>x.id===currentPlannerStudentId);
+            const p = s.planners[currentWeekIndex];
+            p.title = document.getElementById("plan-title").value;
+            const days = ["sat1","sun","mon","tue","wed","thu","fri","sat2","comment"];
+            days.forEach(d => p[d] = document.getElementById(`plan-${d}`).innerHTML);
+            p.dates = {};
+            days.filter(d=>d!=='comment').forEach(d => {
+                p.dates[`${d}_m`] = document.getElementById(`date-${d}-m`).value;
+                p.dates[`${d}_d`] = document.getElementById(`date-${d}-d`).value;
+            });
+            syncStorage();
+        }
+
+        function changeWeek(i) { saveCurrentPlannerData(); currentWeekIndex=i; renderPlannerWeek(); }
+        function saveAndGoList() { saveCurrentPlannerData(); goToList(); }
+        function goToList() { document.getElementById("detail-page").classList.add("hidden"); document.getElementById("planner-page").classList.add("hidden"); document.getElementById("list-page").classList.remove("hidden"); renderTable(); }
+        
+        function exportData() {
+            const blob = new Blob([JSON.stringify(students)], {type: 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${currentActiveSubject}_백업.json`; a.click();
+        }
+        function importData() {
+            const i = document.createElement('input'); i.type='file'; i.onchange=e=>{
+                const f = e.target.files[0]; const r = new FileReader(); r.readAsText(f);
+                r.onload=ev=>{ students=JSON.parse(ev.target.result); syncStorage(); renderTable(); alert("복구완료"); }
+            }; i.click();
+        }
+
+        window.onload = initTheme;
+    </script>
+</body>
+</html>
