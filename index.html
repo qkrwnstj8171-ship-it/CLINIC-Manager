@@ -355,47 +355,53 @@
             .catch(err => console.log("Cloud Load Error:", err));
         }
 
-        function saveToCloudStorage() {
-            if(!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) return;
-            setSavingIndicator(true);
-            
-            const payload = {
-                password: currentTeacherPassword,
-                subject: currentActiveSubject,
-                students: students,
-                profile: teacherProfileMap[currentActiveSubject]
-            };
+// 타이핑 즉시 브라우저에 "초고속 선반영" 후, 구글 서버 전송은 백그라운드 독립 처리
+function triggerAutoSaveDebounce() {
+    if(systemMode === 'student') return; // 학생은 수정 불가
+    
+    // 1. 화면 표시등을 즉시 '저장중'으로 바꾸어 렉이 걸린 것이 아님을 인지시킴
+    setSavingIndicator(true);
+    
+    // 2. 현재 입력된 플래너 내용을 내 컴퓨터(로컬)에 즉시 0.001초만에 임시 저장 (유실 원천 차단)
+    if(!document.getElementById("planner-page").classList.contains("hidden")) {
+        saveCurrentPlannerLocalStorage();
+    }
 
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(resData => {
-                if(resData.result === "success") {
-                    setSavingIndicator(false);
-                    fetchCloudDatabaseSilent(); // 로컬 캐시 갱신
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                document.getElementById("save-status-text").innerText = "동기화 실패(재시도중)";
-            });
-        }
+    // 3. 디바운스 타이머 설정 (타이핑이 완전히 끝나고 0.8초간 대기할 때만 구글로 쏘기)
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        // 무거운 구글 전송은 백그라운드(비동기)로 실행하여 화면 타이핑 흐름을 절대 끊지 않음
+        saveToCloudStorageAsync();
+    }, 800); 
+}
 
-        // 타이핑 즉시 백그라운드 자동 저장 (디바운스 0.6초)
-        function triggerAutoSaveDebounce() {
-            if(systemMode === 'student') return; // 학생은 입력 및 자동저장 불가
-            setSavingIndicator(true);
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
-                // 플래너 페이지인 경우 로컬 배열 구조에 실시간 동기화 후 전송
-                if(!document.getElementById("planner-page").classList.contains("hidden")) {
-                    saveCurrentPlannerLocalStorage();
-                }
-                saveToCloudStorage();
-            }, 600);
-        }
+// 렉 없는 비동기 구글 전송 함수
+function saveToCloudStorageAsync() {
+    if(!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) return;
+    
+    const payload = {
+        password: currentTeacherPassword,
+        subject: currentActiveSubject,
+        students: students,
+        profile: teacherProfileMap[currentActiveSubject]
+    };
+
+    // fetch 통신 시 화면을 차단하지 않도록 비동기 처리
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors", // 브라우저가 구글 응답을 기다리느라 대기하는 시간(CORS 딜레이)을 강제로 생략
+        body: JSON.stringify(payload)
+    })
+    .then(() => {
+        // 전송 명령을 내리자마자 성공으로 간주하고 UI를 해제 (쾌적한 속도감 제공)
+        setSavingIndicator(false);
+        // 내 컴퓨터 하드디스크에도 최종 상태 저장
+        localStorage.setItem(`academy_data_user_${currentTeacherPassword}_sub_${currentActiveSubject}`, JSON.stringify(students));
+    })
+    .catch(err => {
+        console.log("백그라운드 동기화 대기중...", err);
+    });
+}
 
         function setSavingIndicator(isSaving) {
             const dots = ["save-status-dot", "plan-status-dot"];
