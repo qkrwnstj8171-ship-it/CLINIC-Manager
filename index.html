@@ -56,10 +56,14 @@
         .student-name-display { font-size: 24px; font-weight: 700; color: var(--text-color); letter-spacing: -0.5px; }
         .dday-badge { display: inline-block; background-color: #ff3b30; color: white; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: 700; margin-top: 4px; }
         
-        /* 📋 계획표 격자 테두리 완전 통일 최적화 */
-        .planner-table { margin-top: 5px; border: 2px solid #000000; border-collapse: collapse; table-layout: fixed; width: 100%; }
+        /* 📋 계획표 격자 테두리 굵게 보완 (1번 수정) */
+        .planner-table { margin-top: 5px; border: 2px solid #000000; border-collapse: collapse; table-layout: fixed; width: 100%; box-sizing: border-box; }
         .planner-table th { width: 15%; background-color: #f4f5f7; color: #1d1d1f; border: 1px solid #000000; border-right: 2px solid #000000; padding: 12px 4px; text-align: center; vertical-align: middle; }
         .planner-table td { text-align: left; padding: 0; border: 1px solid #000000; background-color: #ffffff; vertical-align: top; }
+        
+        /* 화면에서도 확실하게 보이도록 외곽 라인 두께 강제 적용 */
+        .planner-table:not(.hidden) { border-width: 2px !important; }
+
         .day-name { font-size: 15px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
         .date-wrap { display: block; font-weight: 600; font-size: 11px; color: #555; white-space: nowrap; }
         .day-date-input { width: 22px; text-align: center; border: none; border-bottom: 1px solid #86868b; background: transparent; padding: 0; margin: 0; font-size: 12px; font-weight: 700; color: #1d1d1f; }
@@ -79,7 +83,7 @@
 
         @keyframes blink { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
 
-        /* 🖨️ 인쇄 모드 서식 칼각 통일 */
+        /* 🖨️ 인쇄 모드 칼각 통일 유지 */
         @media print {
             body { background-color: white !important; padding: 0; margin: 0; }
             .container { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 0; }
@@ -115,7 +119,7 @@
         </div>
 
         <div id="login-page" class="hidden">
-            <h2>🔒 Clinic Tool Login (선생님 권한)</h2>
+            <h2>🔒 Clinic Tool Login</h2>
             <p style="font-size: 13px; color: #86868b;">강사 개인 식별 코드를 입력하세요.</p>
             <input type="password" id="access-code" placeholder="비밀번호 입력" onkeypress="if(event.keyCode==13) loginUser()">
             <div style="margin-top: 15px; display: flex; gap: 10px;">
@@ -136,8 +140,8 @@
         </div>
 
         <div id="student-subjects-page" class="hidden">
-            <h2>📋 <span id="std-dash-name" style="color: var(--accent-color);"></span> 학생의 수강 과목 반</h2>
-            <p style="font-size: 13px; color: #86868b; margin-top: -5px;">확인하고 싶은 클리닉 과목 반을 클릭하세요.</p>
+            <h2>📋 <span id="std-dash-name" style="color: var(--accent-color);"></span> 학생 수강 과목 반</h2>
+            <p style="font-size: 13px; color: #86868b; margin-top: -5px;">클리닉 과목 반을 클릭하세요.</p>
             <div id="student-subject-buttons-box"></div>
             <button onclick="backToStudentSearch()" class="btn-gray" style="margin-top: 25px; width: 100%;">◀ 다른 이름 검색</button>
         </div>
@@ -191,7 +195,7 @@
             </div>
             <table>
                 <thead>
-                    <tr><th>이름</th><th>학년/나이</th><th>D-Day</th><th>수강 현황 (강사/교재)</th><th>관리</th></tr>
+                    <tr><th>이름</th><th>학년/나이</th><th>D-Day</th><th>수강 현황</th><th>관리</th></tr>
                 </thead>
                 <tbody id="student-list-body"></tbody>
             </table>
@@ -224,7 +228,7 @@
                 </div>
 
                 <div id="form-senior-detail" class="hidden">
-                    <h4>🔥 고3/재수 전문 관리 시스템 (Teacher / Textbook)</h4>
+                    <h4>🔥 고3/재수 전문 관리 시스템</h4>
                     <div id="detail-box-kor" class="hidden">
                         <div class="form-group"><label>독서</label><div class="sub-input-row"><input type="text" id="detail-kor-read-t" placeholder="선생님" style="width:25%;"><input type="text" id="detail-kor-read-b" placeholder="교재 및 진도"></div></div>
                         <div class="form-group"><label>문학</label><div class="sub-input-row"><input type="text" id="detail-kor-lit-t" placeholder="선생님" style="width:25%;"><input type="text" id="detail-kor-lit-b" placeholder="교재 및 진도"></div></div>
@@ -300,9 +304,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🔗 ⚠️ [필수 연결] 본인의 구글 웹 앱 주소 복사 붙여넣기
-        // ==========================================
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlCyesKeDTRccNoJPFKV-pd1YWEbWlc2kOnVKIuuCr7bsnmjyjkACFpM6lbDaI3rs0/exec";
 
         const themeSets = [
@@ -457,25 +458,16 @@
             } else { junior.classList.remove("hidden"); senior.classList.add("hidden"); }
         }
 
-        // 📝 인쇄용 교재/선생님 명단 텍스트 직관적 포맷팅 (수1 : 현우진 / 뉴런)
         function generateStudentProgressText(s, subject) {
             let info = "";
             if(parseInt(s.age) >= 19) {
-                if(subject === "국어") {
-                    info = `독서 : ${s.kor_read_t || '-'} / ${s.kor_read_b || '-'}   |   문학 : ${s.kor_lit_t || '-'} / ${s.kor_lit_b || '-'}   |   선택(${s.kor_opt || ''}) : ${s.kor_opt_t || '-'} / ${s.kor_opt_b || '-'}`;
-                } else if(subject === "수학") {
-                    info = `수1 : ${s.math_m1_t || '-'} / ${s.math_m1_b || '-'}   |   수2 : ${s.math_m2_t || '-'} / ${s.math_m2_b || '-'}   |   선택(${s.math_opt || ''}) : ${s.math_opt_t || '-'} / ${s.math_opt_b || '-'}`;
-                } else if(subject === "영어") {
-                    info = `단어 : ${s.eng_word_t || '-'} / ${s.eng_word_b || '-'}   |   듣기 : ${s.eng_listen_t || '-'} / ${s.eng_listen_b || '-'}   |   지문분석 : ${s.eng_text_t || '-'} / ${s.eng_text_b || '-'}`;
-                } else if(subject === "탐구(과학)") {
-                    info = `${s.scie_1 || '과탐1'} : ${s.scie_1_t || '-'} / ${s.scie_1_b || '-'}   |   ${s.scie_2 || '과탐2'} : ${s.scie_2_t || '-'} / ${s.scie_2_b || '-'}`;
-                } else if(subject === "탐구(사회)") {
-                    info = `${s.soc_1 || '사탐1'} : ${s.soc_1_t || '-'} / ${s.soc_1_b || '-'}   |   ${s.soc_2 || '사탐2'} : ${s.soc_2_t || '-'} / ${s.soc_2_b || '-'}`;
-                }
-            } else {
-                info = `${subject} : ${s.lec_simple_t || '-'} / ${s.lec_simple_b || '-'}`;
-            }
-            if(s.memo) info += `\n[관리 메모] ${s.memo}`;
+                if(subject === "국어") info = `독서:${s.kor_read_t||'-'}/${s.kor_read_b||'-'} | 문학:${s.kor_lit_t||'-'}/${s.kor_lit_b||'-'} | 선택(${s.kor_opt||''}):${s.kor_opt_t||'-'}/${s.kor_opt_b||'-'}`;
+                else if(subject === "수학") info = `수1:${s.math_m1_t||'-'}/${s.math_m1_b||'-'} | 수2:${s.math_m2_t||'-'}/${s.math_m2_b||'-'} | 선택(${s.math_opt||''}):${s.math_opt_t||'-'}/${s.math_opt_b||'-'}`;
+                else if(subject === "영어") info = `단어:${s.eng_word_t||'-'}/${s.eng_word_b||'-'} | 듣기:${s.eng_listen_t||'-'}/${s.eng_listen_b||'-'} | 지문:${s.eng_text_t||'-'}/${s.eng_text_b||'-'}`;
+                else if(subject === "탐구(과학)") info = `${s.scie_1||'과탐1'}:${s.scie_1_t||'-'}/${s.scie_1_b||'-'} | ${s.scie_2||'과탐2'}:${s.scie_2_t||'-'}/${s.scie_2_b||'-'}`;
+                else if(subject === "탐구(사회)") info = `${s.soc_1||'사탐1'}:${s.soc_1_t||'-'}/${s.soc_1_b||'-'} | ${s.soc_2||'사탐2'}:${s.soc_2_t||'-'}/${s.soc_2_b||'-'}`;
+            } else info = `${subject}:${s.lec_simple_t||'-'}/${s.lec_simple_b||'-'}`;
+            if(s.memo) info += `\n[메모] ${s.memo}`;
             return info;
         }
 
@@ -520,31 +512,25 @@
             }
         }
 
-        // 🚫 중복 클릭 원천 차단 함수 (1번 문제 완전히 해결)
         function saveStudent() {
             const btn = document.getElementById("student-save-submit-btn");
-            if(btn) btn.disabled = true; // 1. 버튼 즉시 차단
-
+            if(btn) btn.disabled = true;
             const name = document.getElementById("detail-name").value.trim(); const age = document.getElementById("detail-age").value;
-            if(!name || !age) { alert("필수 입력정보 누락"); if(btn) btn.disabled = false; return; }
-            
+            if(!name || !age) { alert("필수 입력 누락"); if(btn) btn.disabled = false; return; }
             const data = { name, age, school: document.getElementById("detail-school").value, exam_name: document.getElementById("detail-exam-name").value, exam_date: document.getElementById("detail-exam-date").value };
             const fields = ["lec_simple_t","lec_simple_b","kor_read_t","kor_read_b","kor_lit_t","kor_lit_b","kor_opt","kor_opt_t","kor_opt_b","math_m1_t","math_m1_b","math_m2_t","math_m2_b","math_opt","math_opt_t","math_opt_b","eng_word_t","eng_word_b","eng_listen_t","eng_listen_b","eng_text_t","eng_text_b","scie_1","scie_1_t","scie_1_b","scie_2","scie_2_t","scie_2_b","soc_1","soc_1_t","soc_1_b","soc_2","soc_2_t","soc_2_b","memo"];
             fields.forEach(f => { if(document.getElementById(`detail-${f}`)) data[f] = document.getElementById(`detail-${f}`).value; });
-            
             if(currentEditId) { const i = students.findIndex(x=>x.id===currentEditId); students[i] = {...students[i], ...data}; }
-            else { students.push({id: Date.now(), ...data, planners: createEmptyPlanners()}); }
-            
-            syncStorage(); 
-            goToList(); // 2. 지체 없이 즉시 메인 페이지로 화면 튕겨서 뒤로 보내기
+            else students.push({id: Date.now(), ...data, planners: createEmptyPlanners()});
+            syncStorage(); goToList();
         }
 
         function createEmptyPlanners() {
             return Array.from({length: 4}, (_, i) => ({
                 title: `${new Date().getMonth()+1}월 ${i+1}주차 학습 계획`,
-                sat1: "🎯 클리닉 본 수업 및 테스트", sun: "인강 보충 및 오답 정리", mon: "", tue: "", wed: "", thu: "", fri: "",
-                sat2: "🔥 오답 재테스트 및 점검", comment: "이번 주도 수고 많았습니다!",
-                dates: { sat1_m: "", sat1_d: "", sun_m: "", sun_d: "", mon_m: "", mon_d: "", tue_m: "", tue_d: "", wed_m: "", wed_d: "", thu_m: "", thu_d: "", fri_m: "", fri_d: "", sat2_m: "", sat2_d: "" }
+                sat1: "🎯 클리닉 수업 및 테스트", sun: "보충 및 오답 정리", mon: "", tue: "", wed: "", thu: "", fri: "",
+                sat2: "🔥 오답 재테스트 및 점검", comment: "수고 많았습니다!",
+                dates: { sat1_m:"",sat1_d:"",sun_m:"",sun_d:"",mon_m:"",mon_d:"",tue_m:"",tue_d:"",wed_m:"",wed_d:"",thu_m:"",thu_d:"",fri_m:"",fri_d:"",sat2_m:"",sat2_d:"" }
             }));
         }
 
@@ -555,7 +541,7 @@
             let day = d.getDay(); let diff = (day === 6) ? 0 : 6 - day;
             if (diff > 0) d.setDate(d.getDate() + diff - 7); else d.setDate(d.getDate() + diff);
             d.setDate(d.getDate() + (w - 1) * 7);
-            const order = ['sat1', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat2'];
+            const order = ['sat1','sun','mon','tue','wed','thu','fri','sat2'];
             order.forEach((name, i) => {
                 let t = new Date(d); t.setDate(d.getDate() + i);
                 document.getElementById(`date-${name}-m`).value = t.getMonth() + 1; document.getElementById(`date-${name}-d`).value = t.getDate();
@@ -568,10 +554,9 @@
             document.getElementById("planner-page").classList.remove("hidden");
             const s = students.find(x=>x.id===id); document.getElementById("planner-student-name").innerText = s.name;
             document.getElementById("planner-top-info-box").innerText = generateStudentProgressText(s, currentActiveSubject);
-
             if(systemMode === 'student') {
                 document.getElementById("plan-title").readOnly = true;
-                document.getElementById("planner-back-list-btn").innerText = "◀ 과목 목록으로"; document.getElementById("planner-back-list-btn").onclick = backToStudentSubjects;
+                document.getElementById("planner-back-list-btn").innerText = "◀ 과목 목록"; document.getElementById("planner-back-list-btn").onclick = backToStudentSubjects;
                 document.querySelectorAll(".editable-cell").forEach(el => el.setAttribute("contenteditable", "false"));
                 document.querySelectorAll(".day-date-input").forEach(el => el.readOnly = true);
                 document.getElementById("plan-status-dot").parentElement.classList.add("hidden");
@@ -590,7 +575,7 @@
             const tabs = document.querySelectorAll(".tab-btn"); tabs.forEach((t, i) => t.classList.toggle("active", i===currentWeekIndex));
             document.getElementById("plan-title").value = p.title;
             const days = ["sat1","sun","mon","tue","wed","thu","fri","sat2","comment"];
-            days.forEach(d => { document.getElementById(`plan-${d}`).innerHTML = p[d] || ""; });
+            days.forEach(d => document.getElementById(`plan-${d}`).innerHTML = p[d] || "");
             const dZone = document.getElementById("planner-dday-zone"); const dText = calculateDDay(s.exam_date);
             dZone.innerHTML = dText ? `<span class="dday-badge">${s.exam_name}: ${dText}</span>` : "";
             const dates = p.dates || {};
@@ -619,25 +604,23 @@
         function searchStudentAccess() {
             const name = document.getElementById("search-student-name").value.trim(); const errDiv = document.getElementById("student-search-error"); errDiv.innerText = "";
             if(!name) return alert("이름을 입력해 주세요.");
-            if(!globalCloudDatabase || globalCloudDatabase.length === 0) { errDiv.innerText = "⚠️ 서버 연결 대기 중입니다. 잠시 후 검색해 주세요."; return; }
+            if(!globalCloudDatabase || globalCloudDatabase.length === 0) { errDiv.innerText = "⚠️ 서버 연결 중입니다."; return; }
             studentMatchedBundles = [];
             globalCloudDatabase.forEach(row => {
                 try {
                     const parsed = JSON.parse(row.json);
-                    if(parsed.students) {
-                        parsed.students.forEach(std => {
-                            if(std.name === name) { studentMatchedBundles.push({ subject: parsed.subject, teacherName: parsed.profile ? parsed.profile.name : "-", studentObj: std, allStudentsInSub: parsed.students }); }
-                        });
-                    }
+                    if(parsed.students) parsed.students.forEach(std => {
+                        if(std.name === name) studentMatchedBundles.push({ subject: parsed.subject, teacherName: parsed.profile?parsed.profile.name:"-", studentObj: std, allStudentsInSub: parsed.students });
+                    });
                 } catch(e) {}
             });
-            if(studentMatchedBundles.length === 0) { errDiv.innerText = `❌ '${name}' 학생의 클리닉 내역이 없습니다.`; return; }
+            if(studentMatchedBundles.length === 0) { errDiv.innerText = `❌ '${name}' 학생 내역이 없습니다.`; return; }
             document.getElementById("student-search-page").classList.add("hidden"); document.getElementById("student-subjects-page").classList.remove("hidden");
             document.getElementById("std-dash-name").innerText = name;
             const box = document.getElementById("student-subject-buttons-box"); box.innerHTML = "";
             studentMatchedBundles.forEach((bundle, idx) => {
                 const b = document.createElement("button"); b.className = "subject-select-btn"; b.style.background = "#ffffff"; b.style.border = "2px solid var(--border-color)";
-                b.innerHTML = `📖 <strong>[${bundle.subject}]</strong> 클리닉 반 열람 <span style="float:right; font-size:12px; color:var(--accent-color);">담당: ${bundle.teacherName} 선생님</span>`;
+                b.innerHTML = `📖 <strong>[${bundle.subject}]</strong> 반 열람 <span style="float:right; font-size:12px; color:var(--accent-color);">담당:${bundle.teacherName}</span>`;
                 b.onclick = () => openStudentPlannerView(idx); box.appendChild(b);
             });
         }
